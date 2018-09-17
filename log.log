@@ -1,0 +1,4 @@
+2018-09-17 10:32:36.508 DEBUG [log_test.go/hm_log.TestLog:7] [[Test Debug]]
+2018-09-17 10:38:23.568 DEBUG [log_test.go/hm_log.TestLog:7] [TestDebug]
+2018-09-17 10:44:11.436 DEBUG [log_test.go/hm_log.TestLog:7] [TestDebug]
+2018-09-17 10:45:50.932 DEBUG [log_test.go/hm_log.TestLog:7] [TestDebug]
