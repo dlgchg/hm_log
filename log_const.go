@@ -9,6 +9,11 @@ const (
 	FatalLevel
 )
 
+const (
+	LogSplitTypeHour = iota
+	LogSplitTypeSize
+)
+
 func LogLevelString(level int) (levelStr string) {
 	switch level {
 	case DebugLevel:
