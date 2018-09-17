@@ -1,7 +1,6 @@
 package hm_log
 
 type Log interface {
-	SetLevel(level int)
 	Debug(format string, args ...interface{})
 	Trace(format string, args ...interface{})
 	Info(format string, args ...interface{})

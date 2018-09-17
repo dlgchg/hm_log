@@ -9,18 +9,11 @@ func InitLog(name string, config map[string]string) (err error) {
 	case "file":
 		log, err = NewFileLog(config)
 	case "console":
-		log, err = NewConsoleLog(config)
+		log, err = NewConsoleLog()
 	default:
 		err = fmt.Errorf("unspport log name:%s", name)
 	}
 	return
-}
-
-func SetLevel(level int) {
-	if level < DebugLevel || level > FatalLevel {
-		log.SetLevel(DebugLevel)
-	}
-	log.SetLevel(level)
 }
 
 func Debug(format string, args ...interface{}) {

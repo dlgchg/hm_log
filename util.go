@@ -14,10 +14,11 @@ type LogData struct {
 	FileName string
 	FuncName string
 	LineNo   int
+	IsWarn   bool
 }
 
 func GetLineInfo() (fileName, funcName string, lineNo int) {
-	pc, file, line, ok := runtime.Caller(4)
+	pc, file, line, ok := runtime.Caller(3)
 	if ok {
 		fileName = file
 		funcName = runtime.FuncForPC(pc).Name()
@@ -35,6 +36,8 @@ func MsgInfo(level int, format string, args ...interface{}) *LogData {
 	funcName = path.Base(funcName)
 	msg := fmt.Sprintf(format, args...)
 
+	isWarn := level >= WarnLevel && level <= FatalLevel
+
 	return &LogData{
 		Message:  msg,
 		TimeStr:  nowStr,
@@ -42,6 +45,6 @@ func MsgInfo(level int, format string, args ...interface{}) *LogData {
 		FileName: fileName,
 		FuncName: funcName,
 		LineNo:   lineNo,
+		IsWarn:   isWarn,
 	}
-	//fmt.Fprintf(file, "%s %s [%s/%s:%d] %s\n", nowStr, levelStr, fileName, funcName, lineNo, msg)
 }
