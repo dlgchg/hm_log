@@ -3,16 +3,16 @@ package hm_log
 import (
 	"fmt"
 	"os"
-	"path"
-	"time"
+	"strconv"
 )
 
 type FileLog struct {
-	level    int
-	logPath  string
-	logName  string
-	file     *os.File
-	warnFile *os.File
+	level       int
+	logPath     string
+	logName     string
+	file        *os.File
+	warnFile    *os.File
+	logDataChan chan *LogData
 }
 
 func NewFileLog(config map[string]string) (logFile Log, err error) {
@@ -32,10 +32,21 @@ func NewFileLog(config map[string]string) (logFile Log, err error) {
 		return
 	}
 	level := GetLevel(logLevel)
+
+	logChanSize, ok := config["log_chan_size"]
+	if !ok {
+		logChanSize = "50000"
+	}
+
+	chanSize, e := strconv.Atoi(logChanSize)
+	if e != nil {
+		chanSize = 50000
+	}
 	logFile = &FileLog{
-		level:   level,
-		logPath: logPath,
-		logName: logName,
+		level:       level,
+		logPath:     logPath,
+		logName:     logName,
+		logDataChan: make(chan *LogData, chanSize),
 	}
 
 	logFile.Init()
@@ -68,60 +79,72 @@ func (f *FileLog) SetLevel(level int) {
 }
 
 func (f *FileLog) Debug(format string, args ...interface{}) {
-	if f.level != DebugLevel {
+	if f.level > DebugLevel {
 		return
 	}
-	msgInfo(f.file, f.level, format, args)
+	logData := MsgInfo(DebugLevel, format, args)
+	select {
+	case f.logDataChan <- logData:
+	default:
+	}
 }
 
 func (f *FileLog) Trace(format string, args ...interface{}) {
-	if f.level != TraceLevel {
+	if f.level > TraceLevel {
 		return
 	}
-	msgInfo(f.file, f.level, format, args)
+	logData := MsgInfo(TraceLevel, format, args)
+	select {
+	case f.logDataChan <- logData:
+	default:
+	}
 }
 
 func (f *FileLog) Info(format string, args ...interface{}) {
-	if f.level != InfoLevel {
+	if f.level > InfoLevel {
 		return
 	}
-	msgInfo(f.file, f.level, format, args)
+	logData := MsgInfo(InfoLevel, format, args)
+	select {
+	case f.logDataChan <- logData:
+	default:
+	}
 }
 
 func (f *FileLog) Warn(format string, args ...interface{}) {
-	if f.level != WarnLevel {
+	if f.level > WarnLevel {
 		return
 	}
-	msgInfo(f.warnFile, f.level, format, args)
+	logData := MsgInfo(WarnLevel, format, args)
+	select {
+	case f.logDataChan <- logData:
+	default:
+	}
 }
 
 func (f *FileLog) Error(format string, args ...interface{}) {
-	if f.level != ErrorLevel {
+	if f.level > ErrorLevel {
 		return
 	}
-	msgInfo(f.warnFile, f.level, format, args)
+	logData := MsgInfo(ErrorLevel, format, args)
+	select {
+	case f.logDataChan <- logData:
+	default:
+	}
 }
 
 func (f *FileLog) Fatal(format string, args ...interface{}) {
-	if f.level != FatalLevel {
+	if f.level > FatalLevel {
 		return
 	}
-	msgInfo(f.warnFile, f.level, format, args)
+	logData := MsgInfo(FatalLevel, format, args)
+	select {
+	case f.logDataChan <- logData:
+	default:
+	}
 }
 
 func (f *FileLog) Close() {
 	f.file.Close()
 	f.warnFile.Close()
-}
-
-func msgInfo(file *os.File, level int, format string, args ...interface{}) {
-	now := time.Now()
-	nowStr := now.Format("2006-01-02 15:04:05.999")
-	levelStr := LogLevelString(level)
-	fileName, funcName, lineNo := GetLineInfo()
-	fileName = path.Base(fileName)
-	funcName = path.Base(funcName)
-	msg := fmt.Sprintf(format, args...)
-
-	fmt.Fprintf(file, "%s %s [%s/%s:%d] %s\n", nowStr, levelStr, fileName, funcName, lineNo, msg)
 }

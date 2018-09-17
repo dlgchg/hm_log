@@ -1,6 +1,9 @@
 package hm_log
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type ConsoleLog struct {
 	level int
@@ -30,33 +33,52 @@ func (c *ConsoleLog) SetLevel(level int) {
 }
 
 func (c *ConsoleLog) Debug(format string, args ...interface{}) {
-	msInfo(format, args...)
+	if c.level > DebugLevel {
+		return
+	}
+	logData := MsgInfo(DebugLevel, format, args)
+	fmt.Fprintf(os.Stdout, "%s %s [%s/%s:%d] %s\n", logData.TimeStr, logData.LevelStr, logData.FileName, logData.FuncName, logData.LineNo, logData.Message)
 }
 
 func (c *ConsoleLog) Trace(format string, args ...interface{}) {
-	msInfo(format, args...)
+	if c.level > TraceLevel {
+		return
+	}
+	logData := MsgInfo(TraceLevel, format, args)
+	fmt.Fprintf(os.Stdout, "%s %s [%s/%s:%d] %s\n", logData.TimeStr, logData.LevelStr, logData.FileName, logData.FuncName, logData.LineNo, logData.Message)
 }
 
 func (c *ConsoleLog) Info(format string, args ...interface{}) {
-	msInfo(format, args...)
+	if c.level > InfoLevel {
+		return
+	}
+	logData := MsgInfo(InfoLevel, format, args)
+	fmt.Fprintf(os.Stdout, "%s %s [%s/%s:%d] %s\n", logData.TimeStr, logData.LevelStr, logData.FileName, logData.FuncName, logData.LineNo, logData.Message)
 }
 
 func (c *ConsoleLog) Warn(format string, args ...interface{}) {
-	msInfo(format, args...)
+	if c.level > WarnLevel {
+		return
+	}
+	logData := MsgInfo(WarnLevel, format, args)
+	fmt.Fprintf(os.Stdout, "%s %s [%s/%s:%d] %s\n", logData.TimeStr, logData.LevelStr, logData.FileName, logData.FuncName, logData.LineNo, logData.Message)
 }
 
 func (c *ConsoleLog) Error(format string, args ...interface{}) {
-	msInfo(format, args...)
+	if c.level > ErrorLevel {
+		return
+	}
+	logData := MsgInfo(ErrorLevel, format, args)
+	fmt.Fprintf(os.Stdout, "%s %s [%s/%s:%d] %s\n", logData.TimeStr, logData.LevelStr, logData.FileName, logData.FuncName, logData.LineNo, logData.Message)
 }
 
 func (c *ConsoleLog) Fatal(format string, args ...interface{}) {
-	msInfo(format, args...)
+	if c.level > FatalLevel {
+		return
+	}
+	logData := MsgInfo(FatalLevel, format, args)
+	fmt.Fprintf(os.Stdout, "%s %s [%s/%s:%d] %s\n", logData.TimeStr, logData.LevelStr, logData.FileName, logData.FuncName, logData.LineNo, logData.Message)
 }
 
 func (c *ConsoleLog) Close() {
-}
-
-func msInfo(format string, args ...interface{}) {
-	fmt.Printf(format, args...)
-	fmt.Println()
 }
