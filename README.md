@@ -1,5 +1,6 @@
 # hm_log
 
+golang的日志库，学习之用
 
 ## How to use?
 
